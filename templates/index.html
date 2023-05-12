@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIとおしゃべりしよう!</title>
+</head>
+<body>
+    <!--音声認識を開始するボタンと停止するボタンを用意-->
+    <button onclick="startRecognition()">音声認識を開始</button>
+    <button onclick="stopRecognition()">音声認識を停止</button>
+    <script>
+        // 音声認識の初期化
+    var recognition = new webkitSpeechRecognition();
+    recognition.lang = "ja";
+        // 音声認識結果をサーバーに送信
+    async function synthesizeAndPlay(text) {
+        const response = await fetch('/process_text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 'text': text })
+        });
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+    }
+
+    recognition.onresult = function(event) {
+        var results = event.results;
+        for (var i = event.resultIndex; i < results.length; i++) {
+            if (results[i].isFinal) {
+                var transcript = results[i][0].transcript;
+                
+                // 音声認識結果をサーバーに送信し、合成音声を再生
+                synthesizeAndPlay(transcript);
+            }
+        }
+    }
+
+    function startRecognition() {
+        recognition.start();
+    }
+
+    function stopRecognition() {
+        recognition.stop();
+    }
+    </script>
+</body>
+</html>
