@@ -4,6 +4,7 @@ import io
 import os
 from io import BytesIO
 import openai
+import  jsonify
 import json
 from werkzeug.utils import secure_filename
 from asyncio import sleep
@@ -12,7 +13,7 @@ from flask_cors import CORS
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
-openai.api_key = "your key"
+openai.api_key = "api_key"
 
 app = Flask(__name__)
 CORS(app)
@@ -23,8 +24,11 @@ def index():
 
 @app.route("/process_text", methods=["POST"])
 def process_text():
-    data = request.get_json()
-    transcript = data['text']
+    try:
+     data = request.get_json()
+     transcript = data['text']
+    except Exception as e:
+     return jsonify({"error": str(e)}), 400
  #会話の内容についての制御部分
     SYSTEM_MESSAGE = [
         #日本語でやり取りするならここは日本語で指定した方が正確になるイメージ。特に敬語周りとか
@@ -42,9 +46,15 @@ def process_text():
     )
     #ここで会話の内容を取得する
     generated_text = response.choices[0].text.strip()
-    audio_query_response = post_audio_query(generated_text)
-    audio_data = post_synthesis(audio_query_response)
+    try:
+      audio_query_response = post_audio_query(generated_text)
+      audio_data = post_synthesis(audio_query_response)
+    except Exception as e:
+     return jsonify({"error": "External API request failed"}), 500
     return audio_data
+
+    
+    
 
 #この内容をtextとしてpost_audio_queryに渡す
 
