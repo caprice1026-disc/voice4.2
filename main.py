@@ -1,18 +1,14 @@
 from flask import Flask, render_template , request, Response
 import requests
 import io 
-import uuid
 import os
 from io import BytesIO
 import openai
 import json
 from werkzeug.utils import secure_filename
-import pyaudio
-import wave
 import speech_recognition as sr
 from asyncio import sleep
-import asyncio
-import shutil
+
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
@@ -45,7 +41,9 @@ def process_text():
     )
     #ここで会話の内容を取得する
     generated_text = response.choices[0].text.strip()
-    return generated_text
+    audio_query_response = post_audio_query(generated_text)
+    audio_data = post_synthesis(audio_query_response)
+    return audio_data
 
 #この内容をtextとしてpost_audio_queryに渡す
 

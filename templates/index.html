@@ -11,43 +11,43 @@
     <button onclick="stopRecognition()">音声認識を停止</button>
     <script>
         // 音声認識の初期化
-    var recognition = new webkitSpeechRecognition();
-    recognition.lang = "ja";
+        var recognition = new webkitSpeechRecognition();
+        recognition.lang = "ja";
+        var finalTranscript = "";  // 最後の認識結果を保持する変数
+
         // 音声認識結果をサーバーに送信
-    async function synthesizeAndPlay(text) {
-        const response = await fetch('/process_text', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 'text': text })
-        });
+        async function synthesizeAndPlay(text) {
+            const response = await fetch('/process_text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'text': text })
+            });
 
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.play();
-    }
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.play();
+        }
 
-    recognition.onresult = function(event) {
-        var results = event.results;
-        for (var i = event.resultIndex; i < results.length; i++) {
-            if (results[i].isFinal) {
-                var transcript = results[i][0].transcript;
-                
-                // 音声認識結果をサーバーに送信し、合成音声を再生
-                synthesizeAndPlay(transcript);
+        recognition.onresult = function(event) {
+            var results = event.results;
+            for (var i = event.resultIndex; i < results.length; i++) {
+                if (results[i].isFinal) {
+                    finalTranscript = results[i][0].transcript;
+                }
             }
         }
-    }
 
-    function startRecognition() {
-        recognition.start();
-    }
+        function startRecognition() {
+            recognition.start();
+        }
 
-    function stopRecognition() {
-        recognition.stop();
-    }
+        function stopRecognition() {
+            recognition.stop();
+            synthesizeAndPlay(finalTranscript);  // 音声認識を停止したら、最後の認識結果をサーバーに送信
+        }
     </script>
-</body>
+ </body>
 </html>
