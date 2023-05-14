@@ -37,13 +37,16 @@ def process_text():
  #ここで会話の内容を取得する
     exit_flag = False
     while not exit_flag:
-     SYSTEM_PROMPTS = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
-    response = openai.Completion.create(
-       engine="gpt3.5-turbo",
+        try:
+         SYSTEM_PROMPTS = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
+         response = openai.Completion.create(
+         engine="gpt3.5-turbo",
          messages = SYSTEM_PROMPTS,
          temperature=0.9,
-     max_tokens=1500,
-    )
+         max_tokens=1500,
+         )
+        except Exception as e:
+         return jsonify({"error": "OpenAI API request failed"}), 500
     #ここで会話の内容を取得する
     generated_text = response.choices[0].text.strip()
     try:
