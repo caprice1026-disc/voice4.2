@@ -6,7 +6,6 @@ from io import BytesIO
 import openai
 import json
 from werkzeug.utils import secure_filename
-import speech_recognition as sr
 from asyncio import sleep
 from flask_cors import CORS
 
