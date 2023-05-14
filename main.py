@@ -12,7 +12,7 @@ from asyncio import sleep
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
-openai.api_key = ""
+openai.api_key = "your key"
 
 app = Flask(__name__)
 
