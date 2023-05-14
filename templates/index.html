@@ -44,9 +44,9 @@
             recognition.start();
         }
 
-        function stopRecognition() {
+        async function stopRecognition() {
             recognition.stop();
-            synthesizeAndPlay(finalTranscript);  // 音声認識を停止したら、最後の認識結果をサーバーに送信
+            await synthesizeAndPlay(finalTranscript);  // 音声認識を停止したら、最後の認識結果をサーバーに送信
         }
     </script>
  </body>
