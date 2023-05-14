@@ -26,7 +26,7 @@ def index():
 
 @app.route("/process_text", methods=["POST"])
 def process_text():
-    data = request.form["text"]
+    data = request.get_json()
     transcript = data['text']
  #会話の内容についての制御部分
     SYSTEM_MESSAGE = [
