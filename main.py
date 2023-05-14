@@ -8,6 +8,7 @@ import json
 from werkzeug.utils import secure_filename
 import speech_recognition as sr
 from asyncio import sleep
+import CORS
 
 
 #余計なライブラリは後で削ること
@@ -15,6 +16,7 @@ from asyncio import sleep
 openai.api_key = "your key"
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def index():
