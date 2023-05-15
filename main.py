@@ -11,7 +11,7 @@ import time
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
-openai.api_key = ""
+openai.api_key = "api_key"
 
 app = Flask(__name__)
 CORS(app)
@@ -52,13 +52,13 @@ def process_text():
       audio_data = post_synthesis(audio_query_response)
     except Exception as e:
        return jsonify({"error": str(e)}), 500
-    return Response(audio_data, mimetype='audio/wav')
-
+    return Response(audio_data, mimetype="audio/wav")
     
     
 
 #この内容をtextとしてpost_audio_queryに渡す
-
+#関数は参考にさせていただいた　https://note.com/mega_gorilla/n/n8cec1ce5ccaa
+#speakerはキャラクターにあったものを選択すること
 def post_audio_query(text: str, speaker=1, max_retry=20) -> dict:
     # 音声合成用のクエリを作成する
     query_payload = {"text": text, "speaker": speaker}
