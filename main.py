@@ -11,7 +11,7 @@ import time
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
-openai.api_key = "api_key"
+openai.api_key = ""
 
 app = Flask(__name__)
 CORS(app)
@@ -24,7 +24,7 @@ def index():
 def process_text():
     try:
      data = request.get_json()
-     transcript = data['text']
+     transcript = data["text"]
     except Exception as e:
      return jsonify({"error": str(e)}), 400
  #会話の内容についての制御部分
@@ -33,23 +33,24 @@ def process_text():
         {'role': 'system', 'content': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'},
     ]
  #ここで会話の内容を取得する
-    exit_flag = False
-    while not exit_flag:
-        try:
+    try:
          SYSTEM_PROMPTS = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
-         response = openai.Completion.create(
-         engine="gpt-3.5-turbo",
+         completion = openai.Completion.create(
+         model="gpt-3.5-turbo",
          messages = SYSTEM_PROMPTS,
          temperature=0.9,
          max_tokens=1500,
          )
-        except Exception as e:
+    except Exception as e:
          return jsonify({"error": "OpenAI API request failed"}), 500
     #ここで会話の内容を取得する
-    generated_text = response.choices[0].text.strip()
+    generated_text = completion.choices[0].message
     try:
       audio_query_response = post_audio_query(generated_text)
-      audio_data = post_synthesis(audio_query_response)
+    except Exception as e:
+      return jsonify({"error": "post_audio_query failed: " + str(e)}), 500
+    try:
+     audio_data = post_synthesis(audio_query_response)
     except Exception as e:
        return jsonify({"error": str(e)}), 500
     return Response(audio_data, mimetype="audio/wav")
