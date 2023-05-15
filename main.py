@@ -7,7 +7,7 @@ import openai
 import json
 import asyncio 
 from flask_cors import CORS
-
+import time
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
@@ -51,30 +51,39 @@ def process_text():
       audio_query_response = post_audio_query(generated_text)
       audio_data = post_synthesis(audio_query_response)
     except Exception as e:
-     return jsonify({"error": "External API request failed"}), 500
-    return audio_data
+       return jsonify({"error": str(e)}), 500
+    return Response(audio_data, mimetype='audio/wav')
 
     
     
 
 #この内容をtextとしてpost_audio_queryに渡す
 
-def post_audio_query(generated_text: str) -> dict:
-    params = {'text': generated_text , 'speaker': 1}
-    res = requests.post('http://localhost:50021/audio_query', params=params)
-    return res.json()
+def post_audio_query(text: str, speaker=1, max_retry=20) -> dict:
+    # 音声合成用のクエリを作成する
+    query_payload = {"text": text, "speaker": speaker}
+    for query_i in range(max_retry):
+        r = requests.post("http://localhost:50021/audio_query", params=query_payload, timeout=(10.0, 300.0))
+        if r.status_code == 200:
+            query_data = r.json()
+            break
+        time.sleep(1)
+    else:
+        raise Exception("リトライ回数が上限に到達しました。 audio_query : ", "/", text[:30], r.text)
+    return query_data
 
-def post_synthesis(audio_query_response: dict) -> bytes:
-   params = {'speaker': 1}
-   headers = {'content-type': 'application/json'}
-   audio_query_response_json = json.dumps(audio_query_response)
-   res = requests.post(
-        'http://localhost:50021/synthesis',
-        data=audio_query_response_json,
-        params=params,
-        headers=headers
-    )
-   return Response(res.content, mimetype='audio/wav')
+def post_synthesis(audio_query_response: dict, speaker=1, max_retry=20) -> bytes:
+    synth_payload = {"speaker": speaker}
+    for synth_i in range(max_retry):
+        r = requests.post("http://localhost:50021/synthesis", params=synth_payload, 
+                          data=json.dumps(audio_query_response), timeout=(10.0, 300.0))
+        if r.status_code == 200:
+            # 音声ファイルを返す
+            return r.content
+        time.sleep(1)
+    else:
+        raise Exception("音声エラー：リトライ回数が上限に到達しました。 synthesis : ", r)
+
 
    
 if __name__ == "__main__":
