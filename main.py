@@ -1,19 +1,17 @@
-from flask import Flask, render_template , request, Response
+from flask import Flask, render_template , request, Response, jsonify
 import requests
 import io 
 import os
 from io import BytesIO
 import openai
-import  jsonify
 import json
-from werkzeug.utils import secure_filename
-from asyncio import sleep
+import asyncio 
 from flask_cors import CORS
 
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
-openai.api_key = "api_key"
+openai.api_key = ""
 
 app = Flask(__name__)
 CORS(app)
@@ -40,7 +38,7 @@ def process_text():
         try:
          SYSTEM_PROMPTS = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
          response = openai.Completion.create(
-         engine="gpt3.5-turbo",
+         engine="gpt-3.5-turbo",
          messages = SYSTEM_PROMPTS,
          temperature=0.9,
          max_tokens=1500,
