@@ -28,16 +28,13 @@ def process_text():
     except Exception as e:
      return jsonify({"error": str(e)}), 400
  #会話の内容についての制御部分
-    SYSTEM_MESSAGE = [
-        #日本語でやり取りするならここは日本語で指定した方が正確になるイメージ。特に敬語周りとか
-        {'role': 'system', 'content': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'},
-    ]
+    SYSTEM_MESSAGE = [{'role': 'system', 'content': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'}]
  #ここで会話の内容を取得する
     try:
-         SYSTEM_PROMPTS = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
+         system_prompts = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
          completion = openai.Completion.create(
          model="gpt-3.5-turbo",
-         messages = SYSTEM_PROMPTS,
+         messages = system_prompts,
          temperature=0.9,
          max_tokens=1500,
          )
