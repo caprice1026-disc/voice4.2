@@ -12,6 +12,8 @@ import time
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
 openai.api_key = ""
+ #会話の内容についての制御部分
+SYSTEM_MESSAGE = [{'role': 'system', 'content': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'}]
 
 app = Flask(__name__)
 CORS(app)
@@ -25,13 +27,11 @@ def process_text():
     try:
      data = request.get_json()
      transcript = data["text"]
+     system_prompts = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
     except Exception as e:
      return jsonify({"error": str(e)}), 400
- #会話の内容についての制御部分
-    SYSTEM_MESSAGE = [{'role': 'system', 'content': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'}]
  #ここで会話の内容を取得する
     try:
-         system_prompts = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
          completion = openai.Completion.create(
          model="gpt-3.5-turbo",
          messages = system_prompts,
