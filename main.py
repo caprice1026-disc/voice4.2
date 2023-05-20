@@ -11,9 +11,9 @@ import time
 
 #余計なライブラリは後で削ること
 #環境変数は後で書きなおすこと
-openai.api_key = ""
+openai.api_key = os.getenv("openai_api_key")
  #会話の内容についての制御部分
-SYSTEM_MESSAGE = [{'role': 'system', 'content': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'}]
+SYSTEM_MESSAGE = [{'role': 'system', 'contents': '敬語を使うのをやめてください。次のように行動してください。語尾になのだをつけてください。あなたは、ずんだもんというずんだもちの妖精です。陽気で明るくて、少し変なところがありますがとてもかわいらしい子です。'}]
 
 app = Flask(__name__)
 CORS(app)
@@ -28,8 +28,8 @@ def process_text():
      data = request.get_json()
      transcript = data["text"]
      system_prompts = SYSTEM_MESSAGE + [{'role': 'user', 'content': transcript}]
-    except Exception as e:
-     return jsonify({"error": str(e)}), 400
+    except Exception as err:
+     return jsonify({"error": str(err)}), 400
  #ここで会話の内容を取得する
     try:
          completion = openai.Completion.create(
@@ -67,7 +67,7 @@ def post_audio_query(text: str, speaker=1, max_retry=20) -> dict:
             break
         time.sleep(1)
     else:
-        raise Exception("リトライ回数が上限に到達しました。 audio_query : ", "/", text[:30], r.text)
+        raise Exception("リトライ回数が上限に到達しました。 AudioQuery : ", "/", text[:30], r.text)
     return query_data
 
 def post_synthesis(audio_query_response: dict, speaker=1, max_retry=20) -> bytes:
